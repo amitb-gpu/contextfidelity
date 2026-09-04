@@ -200,9 +200,10 @@ python scripts/plan_runs.py             # the design and its budget
 python scripts/power_check.py           # simulated power, clustered on sessions
 python scripts/seal_protocol.py --version v1.0        # produces the manifest hash
 python scripts/witness_protocol.py --kind ots --identifier <proof>   # attests it
+python scripts/preflight.py                          # fail-closed, incl. write capability
 python scripts/run_phase.py phase1 --harness replay   # pipeline dry run
 python scripts/analyze.py phase1
-python -m pytest                        # 63 tests
+python -m pytest                        # 69 tests
 ```
 
 ## Order of operations, and why it is that order
@@ -234,6 +235,16 @@ labelled synthetic.
 
 **4. Dry run on the replay harness.** Confirms the pipeline recovers a slope that
 was deliberately injected, before spending the real budget.
+
+**5. Pre-flight that proves the agent can actually write.** `scripts/preflight.py`
+creates and then modifies a disposable file in the configured target, through the
+same harness the study uses. This is not ceremony. The first Phase-1 attempt
+passed a text-only smoke test and then collected nothing: the CLI ran in default
+permission mode, every write was denied, and the harness recorded the denial as
+`no_code` — a status the protocol treats as legitimate behaviour. The full phase
+would have produced a clean, fully powered, entirely artifactual null. Denials now
+force a `blocked` status that cannot satisfy a cell, and the incident is recorded
+in `protocol/DEVIATIONS.md`.
 
 ## What the dry run found
 

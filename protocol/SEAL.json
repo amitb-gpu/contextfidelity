@@ -1,7 +1,7 @@
 {
-  "created_at": 1788498017.78,
+  "created_at": 1788545227.866,
   "files": {
-    "protocol/PREREGISTRATION.md": "d3cb46d1e24a256cf22f881557d7f6ce249aaf84ab9474f40ef518a44a1cc109",
+    "protocol/PREREGISTRATION.md": "08ced9b1ec4e430090e375082a0164d4308a66bced5716d5aeb621ee022db6fc",
     "protocol/analysis_plan.md": "5f979796b52768bf9492a20e5422625e1ff79f3719c90caa0c18ec7cc3bd2c12",
     "protocol/stopping_rules.yaml": "0012e61f5fff756f501f24a0a0240675cc971ecf69227b9ce2d75b197cfcf7f4",
     "src/contextfidelity/analysis/gate.py": "8b6ca2c555d335c7d992f4b79a1036b145403956633f7b600842c6e5e8a9f381",
@@ -11,7 +11,7 @@
     "src/contextfidelity/rules.py": "5270493944b7a62f8be5ba822bea80beec4ef35915a40b06269e9351cc8f59dc",
     "src/contextfidelity/scoring.py": "38c5ea7c7b0e6ec9e15c1113537c32d5cf3970be48406261dcf087bbdb41176c"
   },
-  "manifest_hash": "cfe3058868cf8656eeda9227475238abbb69c547e5e218fb3eaf87354b76b1fa",
-  "note": "ContextFidelity preregistered conceptual replication on an exact execution stack",
-  "version": "v1.0"
+  "manifest_hash": "eb747a9e90caca4b9cbc4cb9ec38e331edf38789e6bdc93386fa8983fc0594ec",
+  "note": "Amends v1.0: append-only operational deviation log outside SEALED_GLOBS; harness cannot record denied writes as absent code",
+  "version": "v1.1"
 }

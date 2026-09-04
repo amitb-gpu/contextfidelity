@@ -47,6 +47,18 @@ document with a mutable scoring function is not a preregistration.
 """
 
 
+SEAL_EXCLUDE = frozenset({"protocol/DEVIATIONS.md"})
+"""Files matched by SEALED_GLOBS that are deliberately NOT sealed.
+
+The deviation log is append-only and operational: it records what happened
+during execution, which by definition is not knowable when the protocol is
+frozen. Sealing it would make recording a deviation break the seal, so honesty
+would look like tampering and the only way to stay "intact" would be to say
+nothing. Design and analysis changes are a different matter and still require a
+new seal version — the log is not a side door for editing the protocol.
+"""
+
+
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -120,7 +132,7 @@ def collect(root: Path) -> dict[str, str]:
     out: dict[str, str] = {}
     for pattern in SEALED_GLOBS:
         for p in sorted(root.glob(pattern)):
-            if p.is_file():
+            if p.is_file() and str(p.relative_to(root)) not in SEAL_EXCLUDE:
                 out[str(p.relative_to(root))] = sha256_file(p)
     if not out:
         raise RuntimeError(f"no sealable files found under {root}")

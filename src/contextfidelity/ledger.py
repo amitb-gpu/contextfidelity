@@ -47,7 +47,7 @@ class RunRecord:
     config_sha256: str
 
     # Outcome
-    status: str = "ok"  # ok | no_code | error | timeout
+    status: str = "ok"  # ok | no_code | blocked | error | timeout
     functions_emitted: int = 0
     turns: int = 0
     duration_s: float = 0.0
@@ -55,6 +55,9 @@ class RunRecord:
     output_tokens: int = 0
     cache_read_tokens: int = 0
     cache_write_tokens: int = 0
+    # Ancillary accounting. No preregistered endpoint or gate reads these.
+    total_cost_usd: float = 0.0
+    permission_denials: int = 0
     artifact_path: str = ""
     error: str = ""
 
@@ -101,6 +104,8 @@ class Ledger:
         phase without re-running work, and to detect over-running a cell."""
         counts: dict[str, int] = {}
         for rec in self.read():
+            # "blocked" is deliberately absent: a permission-denied run is a
+            # harness fault, must not satisfy a cell, and must be retried.
             if rec.status in ("ok", "no_code"):
                 key = f"{rec.cell_id}|{rec.task_id}"
                 counts[key] = counts.get(key, 0) + 1

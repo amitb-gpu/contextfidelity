@@ -50,6 +50,8 @@ class SessionResult:
     output_tokens: int = 0
     cache_read_tokens: int = 0
     cache_write_tokens: int = 0
+    total_cost_usd: float = 0.0
+    permission_denials: int = 0
     harness_version: str = ""
     model_id: str = ""
     raw_log: str = ""
@@ -89,8 +91,19 @@ class ClaudeCodeHarness:
                 self._version = f"unknown ({type(exc).__name__})"
         return self._version
 
+    #: Fixed non-interactive harness parameter, not a per-run choice.
+    #:
+    #: In default permission mode the CLI denies every write in headless mode and
+    #: the session returns having changed nothing. That is indistinguishable
+    #: downstream from an agent that declined to write code, so a whole phase
+    #: would score as a clean, fully powered, entirely artifactual null. Runs are
+    #: confined to a target repository that is hard-reset and `git clean -fdx`'d
+    #: before each session.
+    PERMISSION_ARGS = ("--dangerously-skip-permissions",)
+
     def _argv(self, prompt: str) -> list[str]:
         argv = [self.cli_path, "-p", prompt, "--output-format", "stream-json", "--verbose"]
+        argv += list(self.PERMISSION_ARGS)
         if self.model:
             argv += ["--model", self.model]
         return argv + self.extra_args
@@ -131,7 +144,17 @@ class ClaudeCodeHarness:
             result.status = "error"
             result.error = (proc.stderr or "")[:2000]
         result.changed_files = changed_files(repo)
-        if not result.changed_files:
+        if result.permission_denials:
+            # Never allow a denied write to be recorded as "the agent wrote no
+            # code". no_code is a behavioural outcome that feeds the
+            # Code-Production Rate; a denial is a harness fault and the run is
+            # invalid. Fail loudly so it is retried rather than analysed.
+            result.status = "blocked"
+            result.error = (
+                f"{result.permission_denials} permission denial(s); the session could not "
+                "write. This run is invalid and must not enter any denominator."
+            )
+        elif not result.changed_files:
             result.status = "no_code"
         return result
 
@@ -173,6 +196,20 @@ def parse_stream(stdout: str) -> SessionResult:
             model = (evt.get("message", {}) or {}).get("model")
             if model:
                 res.model_id = str(model)
+
+        elif evt.get("type") == "result":
+            # The terminal event carries session totals. Summing per-turn usage
+            # double-counts cache reads (each turn reports its own read against a
+            # shared prefix) and undercounts the rest, so these totals win when
+            # present. Ancillary accounting only: no scientific endpoint reads it.
+            usage = evt.get("usage", {}) or {}
+            if usage:
+                res.input_tokens = int(usage.get("input_tokens", 0) or 0)
+                res.output_tokens = int(usage.get("output_tokens", 0) or 0)
+                res.cache_read_tokens = int(usage.get("cache_read_input_tokens", 0) or 0)
+                res.cache_write_tokens = int(usage.get("cache_creation_input_tokens", 0) or 0)
+            res.total_cost_usd = float(evt.get("total_cost_usd", 0.0) or 0.0)
+            res.permission_denials = len(evt.get("permission_denials", []) or [])
 
     if not res.timeline:
         res.parse_warnings.append(

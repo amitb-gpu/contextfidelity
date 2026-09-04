@@ -185,3 +185,31 @@ def test_verify_summaries_render(settings):
     broken = sealmod.verify(settings.root, settings.seal_path)
     assert not broken.ok
     assert "SEAL BROKEN" in broken.summary()
+
+
+def test_deviation_log_is_never_sealed(settings):
+    """Appending an operational deviation must not break the seal.
+
+    If it did, the only way to keep an intact seal would be to record nothing,
+    and the audit trail would reward silence.
+    """
+    (settings.protocol_dir / "DEVIATIONS.md").write_text("# Deviations\n")
+    seal = sealmod.create(settings.root, "v1")
+    sealmod.write(seal, settings.seal_path)
+    assert "protocol/DEVIATIONS.md" not in seal.files
+    assert sealmod.verify(settings.root, settings.seal_path).ok
+
+    with (settings.protocol_dir / "DEVIATIONS.md").open("a") as fh:
+        fh.write("\n## D-001 something happened\n")
+    after = sealmod.verify(settings.root, settings.seal_path)
+    assert after.ok, "appending a deviation must not break the seal"
+    assert after.seal.manifest_hash == seal.manifest_hash
+
+
+def test_design_files_are_still_sealed_despite_the_exclusion(settings):
+    """The exclusion is one file, not a door: protocol documents and the
+    scorers stay sealed."""
+    seal = sealmod.create(settings.root, "v1")
+    assert "protocol/PREREGISTRATION.md" in seal.files
+    assert "protocol/stopping_rules.yaml" in seal.files
+    assert any("scoring.py" in f for f in seal.files)

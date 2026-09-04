@@ -15,6 +15,7 @@ and carry-over would confound within-session attenuation with across-run drift.
 from __future__ import annotations
 
 import json
+import subprocess
 import time
 from dataclasses import asdict
 from pathlib import Path
@@ -75,6 +76,31 @@ def inject_config(repo: Path, rung: Rung, enabled: bool) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
 
 
+def assert_target_cwd(run_cwd: Path, settings: Settings, commit: str) -> None:
+    """Refuse to invoke the real agent anywhere but the configured target.
+
+    Without this, an unset target_repo silently resolves to Path(".") and the
+    agent is turned loose on the study's own working tree — editing the very
+    scorers and protocol files the seal exists to protect.
+    """
+    if settings.target_repo is None:
+        raise RuntimeError(
+            "refusing to run the real CLI with no target_repo configured: it would "
+            "execute in the study's own working directory"
+        )
+    want = Path(settings.target_repo).resolve()
+    got = Path(run_cwd).resolve()
+    if got != want:
+        raise RuntimeError(f"refusing to run: cwd {got} is not the configured target {want}")
+    if not (got / ".git").exists():
+        raise RuntimeError(f"refusing to run: {got} is not a git repository")
+    head = subprocess.run(
+        ["git", "-C", str(got), "rev-parse", "HEAD"], capture_output=True, text=True
+    ).stdout.strip()
+    if commit not in ("HEAD", "") and head != commit:
+        raise RuntimeError(f"refusing to run: target HEAD {head[:12]} != pinned {commit[:12]}")
+
+
 def execute_run(
     planned: PlannedRun,
     settings: Settings,
@@ -96,10 +122,12 @@ def execute_run(
         config_sha = "" if not planned.config else "replay"
         registry = {}
 
+    run_cwd = Path(repo) if repo else Path(".")
+    if getattr(harness, "name", "") == "claude-code":
+        assert_target_cwd(run_cwd, settings, commit)
+
     started = time.time()
-    result: SessionResult = harness.run(
-        Path(repo) if repo else Path("."), task.prompt, settings.run_timeout_s
-    )
+    result: SessionResult = harness.run(run_cwd, task.prompt, settings.run_timeout_s)
 
     scores = score_run(result.changed_files, rung, registry)
     pos_report = assign_generation_positions(scores, result.timeline)
@@ -148,6 +176,8 @@ def execute_run(
         output_tokens=result.output_tokens,
         cache_read_tokens=result.cache_read_tokens,
         cache_write_tokens=result.cache_write_tokens,
+        total_cost_usd=result.total_cost_usd,
+        permission_denials=result.permission_denials,
         artifact_path=str(artifact),
         error=result.error[:500],
     )

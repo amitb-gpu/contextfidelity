@@ -1,8 +1,8 @@
 {
-  "created_at": 1788498048.609,
-  "identifier": "opentimestamps:b2487521b3b20dd2cc7093da648807e029cf51d34e4887a2500f0f0889574b0f",
+  "created_at": 1788545286.485,
+  "identifier": "opentimestamps:aee4160022d2706f7e634d84832c8bf07c5fdb35200bf2f0036093c857b2a201",
   "kind": "ots",
-  "manifest_hash": "cfe3058868cf8656eeda9227475238abbb69c547e5e218fb3eaf87354b76b1fa",
-  "note": "OTS proof over protocol/SEAL.json (sha256 b2487521...), which carries manifest_hash cfe30588...; submitted to 4 calendars, pending Bitcoin anchoring at time of writing (ots upgrade to confirm)",
+  "manifest_hash": "eb747a9e90caca4b9cbc4cb9ec38e331edf38789e6bdc93386fa8983fc0594ec",
+  "note": "OTS proof over protocol/SEAL.json (sha256 aee41600...) carrying manifest eb747a9e...; 4 calendars; pending Bitcoin anchoring, ots upgrade to confirm. Supersedes the v1.0 witness, which remains at tag v1.0-protocol.",
   "proof_file": "SEAL.json.ots"
 }

@@ -3,11 +3,17 @@
 **Study:** Within-session instruction attenuation in coding agents — preregistered
 replication and complexity extension
 
-**Status:** SEALED at v1.0. Sealing before the environment check has run is a
-protocol violation; the check was run first and recorded in
+**Status:** SEALED at v1.1, superseding v1.0. Sealing before the environment
+check has run is a protocol violation; the check was run first and recorded in
 `protocol/ENVIRONMENT.json`.
 
-**Seal version:** v1.0
+**Seal version:** v1.1 (amends v1.0; see §9)
+
+**No valid experimental data were collected under v1.0.** The single session
+attempted under it is quarantined and excluded from every denominator. v1.0 and
+its witness remain in the history at tag `v1.0-protocol` and are not rewritten:
+an amendment that erased the thing it amends would be indistinguishable from
+tampering.
 
 **External witness:** recorded in `protocol/WITNESS.json`, not here. This file is
 one of the sealed files, so an identifier written into it would change the very
@@ -239,12 +245,33 @@ point estimate.
   including it here would recreate the confounded multi-intervention design this
   study exists to avoid.
 
-## 9. Deviations
+## 9. Deviations and amendment procedure
 
-Any departure from this document after sealing is recorded here with its date and
-reason, and the protocol is re-sealed with a new version. Both seals are reported.
-Silent overwriting defeats the purpose of sealing.
+Departures are split by kind, because the two have opposite failure modes.
 
-| Date | Deviation | Reason | New seal |
-|---|---|---|---|
-| — | — | — | — |
+**Experimental or design changes** — anything touching the hypotheses, the task
+pool, the ladder, the scorers, the analysis model, the gate, or the stopping
+rules — require re-sealing under a new version and a new external witness. Both
+seals are reported and the superseded tag is preserved. Amending v1.0 into v1.1
+is itself an instance of this rule.
+
+**Operational deviations** — what actually happened while executing: harness
+configuration, infrastructure faults, invalidated runs, environment drift — are
+appended to `protocol/DEVIATIONS.md`. That file is append-only and is
+deliberately **outside** `SEALED_GLOBS`.
+
+The exclusion is not a convenience. Operational facts are not knowable when the
+protocol is frozen, so sealing the log would mean that recording a deviation
+breaks the seal: honesty would present as tampering, and the only way to keep an
+intact seal would be to record nothing. A test asserts that appending to the log
+leaves the manifest hash unchanged, and a second asserts the exclusion is exactly
+one file, so the log cannot become a side door for editing the protocol.
+
+Each entry names the protocol tag and manifest hash in force when it occurred.
+
+| Version | Date | Change | Kind | Manifest |
+|---|---|---|---|---|
+| v1.0 | 2026-09-03 | Initial seal | — | `cfe3058868cf…` |
+| v1.1 | 2026-09-04 | Introduce the append-only operational deviation log and exclude it from the seal; fix the harness so denied writes cannot be recorded as absent code | design | see `protocol/SEAL.json` |
+
+Operational entries live in `protocol/DEVIATIONS.md`, not in this table.
