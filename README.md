@@ -1,7 +1,163 @@
-# contextfidelity
+# ContextFidelity
 
-A preregistered replication of within-session instruction attenuation in coding
-agents, extended along instruction complexity.
+**Does a coding agent keep following the rules it was given as a session gets longer?**
+
+ContextFidelity is a preregistered replication and extension of a 2026 finding that
+coding-agent instruction compliance may weaken within a single work session. It
+starts with the simplest possible version of that claim, tests whether it
+reproduces, and only then asks whether harder instructions make the effect worse
+and whether putting the right rule back in front of the agent can reduce it.
+
+## Start here — what this project actually does
+
+Imagine giving a coding agent one repository rule:
+
+> Every function you create or modify must begin with `// @tracked`.
+
+The agent is then asked to do a real coding task that causes it to create or edit
+many functions. ContextFidelity scores every function in the order the agent
+produced it:
+
+```text
+function 1    followed the rule
+function 2    followed the rule
+function 3    followed the rule
+function 4    missed it
+function 5    followed it again
+function 6    missed it
+...
+```
+
+The question is not whether the model *knows* what `// @tracked` means. The rule
+is explicitly written into the repository configuration. The question is whether
+its **behavior remains faithful to that instruction as the session unfolds**.
+
+McMillan (2026) reported an exploratory result suggesting that each additional
+function generated within a session was associated with lower odds of following
+a repository instruction. The paper is careful about the result: it was found
+during analysis rather than specified beforehand, and the author calls for
+independent replication.
+
+That makes the first question here deliberately boring and important:
+
+> **Does the effect reproduce when the test and decision rule are fixed before the
+> data are collected?**
+
+If the answer is no, the project stops. A null result is a result.
+
+If it does reproduce, ContextFidelity asks two harder questions.
+
+### Does instruction complexity change the effect?
+
+The project uses four instruction levels, all matched so that every new or
+modified function is still one scoring opportunity:
+
+- **L0 — simple static rule:** every function gets one fixed marker.
+- **L1 — conditional rule:** use the marker only when a locally visible condition
+  is true.
+- **L2 — multi-step procedure:** satisfy three separate requirements on every
+  function.
+- **L3 — cross-file rule:** consult a repository registry to determine which
+  marker applies.
+
+The important part is that the experiment does not simply make harder rules
+contain more chances to fail and then call the lower score an effect. Atomic
+compliance is the primary comparison scale, and opportunity counts are matched by
+construction.
+
+### Can putting the rule back in front of the agent help?
+
+If attenuation exists, the final phase compares four ways of carrying the rule
+through the session:
+
+```text
+A1  configuration only
+A2  periodic reminder of the real rule
+A3  re-surface the real rule exactly when it becomes relevant
+A4  re-surface an irrelevant rule of matched length at the same moment
+```
+
+A4 is the placebo. Without it, an apparent benefit from A3 could simply mean that
+*any* interruption or fresh text resets attention. If the irrelevant rule helps
+just as much as the real one, that is a different and arguably more interesting
+result.
+
+## What happens during one run
+
+For each planned trial the harness performs the same sequence:
+
+```text
+verify frozen protocol
+        ↓
+reset the target repository
+        ↓
+inject the configured rule
+        ↓
+run the coding agent on a fixed task
+        ↓
+capture the code diff and generation timeline
+        ↓
+score every new or modified function
+        ↓
+assign within-session generation positions
+        ↓
+append the result to a tamper-evident run ledger
+```
+
+The repository is reset between trials so one run cannot contaminate the next.
+A run that asks a clarifying question instead of producing code is recorded as a
+separate **Code-Production** outcome rather than silently counted as instruction
+failure.
+
+Before any paid model run, the same pipeline can operate on a replay harness with
+a deliberately injected compliance pattern. The replay harness is not a model
+simulator. Its job is only to prove that, if a known effect is present in the
+input data, the scoring and analysis pipeline can recover it.
+
+## Why the preregistration matters
+
+This project exists because the result being tested was exploratory. Re-running an
+exploratory finding while freely changing the scorer, stopping rule, or analysis
+until something looks significant would not resolve that uncertainty.
+
+ContextFidelity therefore freezes together:
+
+- the protocol,
+- the scoring rules,
+- the statistical model,
+- the phase gates, and
+- the reproduction criterion.
+
+The frozen bundle is externally timestamped before the first real run. The runner
+refuses to execute a real phase if the seal is missing or altered.
+
+The study also distinguishes an **exact-stack replication** from a **conceptual
+replication**. The original used Claude Code CLI 2.1.92 with Sonnet 4.6. If that
+stack can still be reproduced, Phase 1 uses it. If it cannot, the replacement
+stack is named and frozen before collection rather than quietly changing the
+meaning of "replication" after the fact.
+
+## What would count as an interesting result?
+
+Several outcomes would matter:
+
+- **No replication:** the reported attenuation does not survive a preregistered
+  independent test.
+- **Replication, no complexity interaction:** the effect exists but does not
+  become materially worse for the harder instruction classes tested here.
+- **Complexity interaction:** more demanding instructions show a different
+  within-session adherence pattern.
+- **Targeted re-surfacing helps, placebo does not:** relevant rule content appears
+  to matter.
+- **Targeted and placebo re-surfacing both help:** interruption or recency may be
+  doing the work rather than the rule content itself.
+- **Neither helps:** simple re-surfacing is not an effective remedy under the
+  tested conditions.
+
+None of those outcomes requires claiming that the model literally "forgot" the
+instruction. ContextFidelity measures behavior. Lost salience, planning
+competition, prompt construction, compaction, retrieval and harness behavior can
+all produce similar observations.
 
 ## The target
 
