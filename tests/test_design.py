@@ -82,3 +82,25 @@ def test_task_paths_follow_the_baseline_app_router_layout():
         if "src/app/" in t.prompt:
             assert "src/app/[locale]/" in t.prompt, t.id
         assert "src/lib/" not in t.prompt, t.id
+
+
+def test_freeze_script_expected_runs_matches_the_design():
+    """The freeze refuses to certify a short phase, so its expectation must
+    track the design rather than a number typed once."""
+    import importlib.util
+    from pathlib import Path
+
+    from contextfidelity.design import build
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "freeze_ledger.py"
+    spec = importlib.util.spec_from_file_location("freeze_ledger", path)
+    mod = importlib.util.module_from_spec(spec)
+    import sys
+
+    sys.path.insert(0, str(path.parent))
+    try:
+        spec.loader.exec_module(mod)
+    finally:
+        sys.path.remove(str(path.parent))
+
+    assert mod.EXPECTED_RUNS["phase1"] == build()["phase1"].runs()

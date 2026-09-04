@@ -202,8 +202,9 @@ python scripts/seal_protocol.py --version v1.0        # produces the manifest ha
 python scripts/witness_protocol.py --kind ots --identifier <proof>   # attests it
 python scripts/preflight.py                          # fail-closed, incl. write capability
 python scripts/run_phase.py phase1 --harness replay   # pipeline dry run
+python scripts/freeze_ledger.py phase1               # freeze raw data first
 python scripts/analyze.py phase1
-python -m pytest                        # 69 tests
+python -m pytest                        # 70 tests
 ```
 
 ## Order of operations, and why it is that order
