@@ -1,5 +1,7 @@
 # ContextFidelity
 
+> **Status: DRAFT / UNSEALED.** Protocol development only; no experimental data have been collected.
+
 **Does a coding agent keep following the rules it was given as a session gets longer?**
 
 ContextFidelity is a preregistered replication and extension of a 2026 finding that
@@ -190,7 +192,7 @@ python scripts/power_check.py           # simulated power, clustered on sessions
 python scripts/seal_protocol.py --version v1.0 --timestamp <your DOI>
 python scripts/run_phase.py phase1 --harness replay   # pipeline dry run
 python scripts/analyze.py phase1
-python -m pytest                        # 49 tests
+python -m pytest                        # 50 tests
 ```
 
 ## Order of operations, and why it is that order

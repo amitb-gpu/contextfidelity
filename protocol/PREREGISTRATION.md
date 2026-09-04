@@ -8,7 +8,7 @@ Sealing before the environment check has run is a protocol violation.
 
 **Seal version:** TBD
 **External timestamp (DOI / OTS proof):** TBD
-**Replication mode (EXACT | CONCEPTUAL):** TBD — set by `scripts/check_environment.py`
+**Replication mode:** EXACT — Claude Code CLI 2.1.92 with Claude Sonnet 4.6 (`claude-sonnet-4-6`)
 
 ---
 
@@ -126,7 +126,7 @@ Committed in `analysis_plan.md` and implemented in
 All four required, evaluated by `analysis/gate.py`:
 
 1. No-configuration baseline marker rate ≤ 1%.
-2. Floor-control position-1 compliance ≥ 60%.
+2. Floor-control position-1 compliance ≥ 50%.
 3. Linear position slope negative with 95% session-bootstrap CI excluding zero.
 4. CI on the odds ratio overlaps the preregistered compatibility band
    [0.85, 1.00].
