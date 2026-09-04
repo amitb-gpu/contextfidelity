@@ -6,4 +6,5 @@ runs/
 results/
 config.yaml
 protocol/ENVIRONMENT.json
-note: protocol/SEAL.json is intentionally NOT ignored - it is the audit trail
+note: protocol/SEAL.json, protocol/WITNESS.json and any .ots proof are
+intentionally NOT ignored - together they are the audit trail

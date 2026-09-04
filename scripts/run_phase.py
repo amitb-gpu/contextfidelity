@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Execute a phase. Refuses to run without an intact seal.
+"""Execute a phase. Refuses to run without an intact seal, and refuses real
+collection without a valid external witness.
 
     python scripts/run_phase.py phase1 --harness replay --limit 60
     python scripts/run_phase.py phase1 --harness claude-code
@@ -51,7 +52,13 @@ def main() -> int:
                   f"{out['opportunities']} opportunities  "
                   f"coverage {out['position_coverage']:.2f}")
 
-    result = run_phase(phase, s, factory, args.target_rung, args.limit, progress)
+    # Real collection is fail-closed on the witness as well as the seal; replay
+    # is exempt because a synthetic run claims nothing about when the protocol
+    # existed.
+    result = run_phase(
+        phase, s, factory, args.target_rung, args.limit, progress,
+        require_witness=(s.harness != "replay"),
+    )
     print(json.dumps(result, indent=2))
     if s.harness == "replay":
         print("\nREPLAY HARNESS: these are synthetic sessions from a specified")

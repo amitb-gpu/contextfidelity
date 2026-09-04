@@ -198,10 +198,11 @@ pip install -e .
 python scripts/check_environment.py     # go/no-go: EXACT or CONCEPTUAL?
 python scripts/plan_runs.py             # the design and its budget
 python scripts/power_check.py           # simulated power, clustered on sessions
-python scripts/seal_protocol.py --version v1.0 --timestamp <your DOI>
+python scripts/seal_protocol.py --version v1.0        # produces the manifest hash
+python scripts/witness_protocol.py --kind ots --identifier <proof>   # attests it
 python scripts/run_phase.py phase1 --harness replay   # pipeline dry run
 python scripts/analyze.py phase1
-python -m pytest                        # 55 tests
+python -m pytest                        # 63 tests
 ```
 
 ## Order of operations, and why it is that order
@@ -220,6 +221,16 @@ this mid-collection means the runs already spent belong to neither mode.
 **3. Seal before data.** `runner.py` refuses to execute a phase without an intact
 seal. The seal covers the protocol *and* the scorer *and* the analysis model — a
 frozen protocol with a mutable scoring function is not a preregistration.
+
+The manifest hash covers the sealed files and protocol metadata only, never the
+witness. That separation is load-bearing rather than tidy: an external witness
+attests a hash, so the hash has to exist first. An earlier version folded the
+external timestamp into the hash, which made OpenTimestamps impossible in
+principle — stamping the hash changed the hash. Witness metadata now lives in
+`protocol/WITNESS.json` beside the seal, references the manifest hash, and a test
+asserts that recording it leaves the manifest byte-identical. Real collection is
+fail-closed on both: intact seal *and* valid witness; replay is exempt and is
+labelled synthetic.
 
 **4. Dry run on the replay harness.** Confirms the pipeline recovers a slope that
 was deliberately injected, before spending the real budget.

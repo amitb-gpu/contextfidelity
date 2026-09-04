@@ -169,10 +169,20 @@ def run_phase(
     resolved_rung: str | None = None,
     limit: int | None = None,
     on_run: Callable[[dict[str, Any]], None] | None = None,
+    require_witness: bool = False,
 ) -> dict[str, Any]:
     """Execute a phase. Verifies the seal once up front and refuses to run
-    without it — data collected under a broken seal is not preregistered."""
+    without it — data collected under a broken seal is not preregistered.
+
+    `require_witness` additionally refuses to run without a valid external
+    witness. Callers set it for real collection and leave it off for replay: an
+    intact seal shows the protocol did not change, but only a witness shows it
+    predates the data, and synthetic runs make no such claim.
+    """
     seal = sealmod.require_intact(settings.root, settings.seal_path)
+    if require_witness:
+        sealmod.require_witnessed(seal, settings.seal_path)
+    wstate = sealmod.witness_state(seal, settings.seal_path)
     ledger = Ledger(settings.ledger_dir / f"{phase.id}.jsonl")
     done = ledger.completed_cells()
 
@@ -211,7 +221,8 @@ def run_phase(
         "ledger_intact": ok,
         "ledger_message": msg,
         "seal": seal.manifest_hash[:12],
-        "seal_status": seal.status,
+        "seal_status": wstate.status,
+        "witness": wstate.detail,
         "distinct_seals_in_ledger": sorted(h[:12] for h in ledger.seal_hashes()),
     }
 
