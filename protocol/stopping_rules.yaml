@@ -1,0 +1,43 @@
+# Phase gates. Committed before data collection; implemented in analysis/gate.py.
+
+phase1:
+  question: "RQ1 - does within-session attenuation replicate?"
+  criterion_all_required:
+    zero_floor_max: 0.01          # no-configuration baseline marker rate
+    floor_control_min: 0.60       # position-1 compliance in single-function control
+    slope_negative_ci_excludes_zero: true
+    or_compatibility_band: [0.85, 1.00]
+  minimum_sample:
+    sessions: 30
+    atoms: 1500
+  outcomes:
+    REPRODUCED: "proceed to phase 2"
+    NOT_REPRODUCED: "stop and write up the null; it is a result"
+    INCONCLUSIVE: "stop and report the shortfall; do not round toward an answer"
+
+phase2:
+  question: "RQ2 - does attenuation change with instruction complexity?"
+  entry: "phase1 == REPRODUCED"
+  exit: >
+    Proceed to phase 3 only if at least one rung shows attenuation whose CI
+    excludes zero. The rung with the steepest preregistered slope becomes the
+    phase-3 target, resolving the TARGET placeholder in the design. The
+    placeholder exists so the plan can be sealed before the value is known.
+
+phase3:
+  question: "RQ3 - does re-surfacing reduce attenuation, and is it content or interruption?"
+  entry: "phase2 identified at least one attenuating rung"
+  interpretation:
+    A3_only: "recovery attributable to re-surfacing the applicable rule"
+    A3_and_A4: >
+      recovery is attention interruption, not rule content. This is a more
+      informative result than the one being hunted and is reported as the
+      headline if it occurs.
+    A4_only: "unexpected; report descriptively and do not explain post hoc"
+    neither: "re-surfacing does not rescue attenuation"
+
+budget_guard:
+  note: >
+    The original ran 50 sessions per condition across 24 conditions. Four rungs
+    by four arms plus floor controls at that depth exceeds 800 sessions. Gates
+    exist so the expensive phases are reached only if the cheap one earns them.

@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextfidelity"
+version = "0.1.0"
+description = "Preregistered replication of within-session instruction attenuation in coding agents, extended along instruction complexity"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pyyaml>=6.0",
+    "tree-sitter>=0.23",
+    "tree-sitter-typescript>=0.23",
+]
+
+[project.optional-dependencies]
+stats = ["statsmodels>=0.14"]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

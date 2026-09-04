@@ -1,0 +1,14 @@
+name: contextfidelity
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - numpy>=1.26
+  - scipy>=1.11
+  - pyyaml>=6.0
+  - statsmodels>=0.14     # cluster-robust GLM cross-check and power simulation
+  - pytest>=8.0
+  - pip:
+      - tree-sitter>=0.23
+      - tree-sitter-typescript>=0.23
