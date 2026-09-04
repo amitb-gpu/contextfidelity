@@ -282,45 +282,85 @@ class Task:
     description: str = ""
 
 
+TASK_PROVENANCE = """Task provenance, stated plainly because it bounds what this study can claim.
+
+McMillan (2026) publishes task *descriptions*, not verbatim prompts. T3, T4 and
+T5 below are therefore RECONSTRUCTED from those published descriptions, not
+copied. They are worded to be executable against the reconstructed baseline
+780c3dca75e6b39d92c8ac287618ed624eae802a of ixartz/Next-js-Boilerplate, and
+deliberately carry no requirement that the publication does not describe. In
+particular, none of them was padded to raise function counts: doing so would
+manufacture the very artifact the opportunity-matched ladder exists to prevent.
+
+F1 is NOT from McMillan's task set. It is a ContextFidelity floor control, and
+is labelled as such wherever it appears, so that it is never reported as part of
+the replicated task pool.
+
+If verbatim prompts are later obtained from the author, replacing these is a
+protocol amendment and must be recorded as a new seal version.
+"""
+
+
 FLOOR_TASKS: tuple[Task, ...] = (
     Task(
         "F1",
-        "Add a single exported async function `getBuildInfo` to src/lib/build-info.ts "
+        "Add a single exported async function `getBuildInfo` to src/libs/BuildInfo.ts "
         "that returns an object with the current package version and build timestamp. "
         "Create the file if it does not exist. Write exactly one function.",
         "write_new",
         "single",
-        "Floor control. Establishes that the agent CAN comply at generation position 1 "
-        "at this rung. Without it, a flat slope is ambiguous between 'no attenuation' "
-        "and 'never complied at all'.",
+        "ContextFidelity floor control, NOT part of McMillan's task set. Establishes "
+        "that the agent CAN comply at generation position 1 at this rung. Without it, "
+        "a flat slope is ambiguous between 'no attenuation' and 'never complied at "
+        "all'. Path uses src/libs/ to match the baseline's existing convention; the "
+        "repository has no src/lib/ directory, and creating one would interact with "
+        "the naming-convention placebo rule.",
     ),
 )
 
 MULTI_TASKS: tuple[Task, ...] = (
     Task(
         "T3",
-        "Add a settings page at src/app/settings/page.tsx with sections for profile, "
-        "notifications, and appearance. Include the form components, validation "
-        "helpers, and state handlers each section needs.",
+        "Integrate NextAuth into this application. Add the NextAuth route handler, a "
+        "shared auth configuration registering at least one provider, a session "
+        "provider wrapping the application, and the helper functions needed to read "
+        "the current session from server components and from client components.",
         "write_new",
         "multi",
+        "RECONSTRUCTED from McMillan's published T3 description ('NextAuth "
+        "integration'). Note the baseline ships Clerk (@clerk/nextjs), so this asks "
+        "the agent to introduce a second auth stack. That is a property of the "
+        "published task against this repository, not a defect introduced here, and it "
+        "is not corrected: silently substituting a Clerk task would make the task pool "
+        "diverge from the publication being replicated.",
     ),
     Task(
         "T4",
-        "Refactor the existing layout components so that navigation state is managed in "
-        "one place rather than duplicated across components. Update every affected "
-        "component.",
+        "The dashboard and marketing layouts each define their navigation links inline "
+        "and pass them to BaseTemplate. Refactor so that navigation is defined in one "
+        "shared place and consumed by both, introducing a sidebar navigation component "
+        "that the dashboard layout uses. Update every affected layout and component.",
         "modify_existing",
         "multi",
-        "The original's lowest-compliance task type. Retained because the modify/write "
-        "contrast was their largest single observation.",
+        "RECONSTRUCTED from McMillan's published T4 description ('Sidebar/layout "
+        "refactor'). Grounded in the baseline's actual duplication: leftNav/rightNav "
+        "are passed inline to BaseTemplate from several layouts. The original's "
+        "lowest-compliance task type, and the modify-vs-write contrast was their "
+        "largest single observation.",
     ),
     Task(
         "T5",
-        "Add a dashboard analytics page at src/app/dashboard/analytics/page.tsx with "
-        "loading skeletons, a data-fetching layer, and chart container components.",
+        "Add an analytics page to the dashboard at "
+        "src/app/[locale]/(auth)/dashboard/analytics/page.tsx. Include loading "
+        "skeleton components displayed while data is pending, the data-fetching layer "
+        "the page requires, and container components for the charts.",
         "write_new",
         "multi",
+        "RECONSTRUCTED from McMillan's published T5 description ('dashboard analytics "
+        "page with loading skeletons'). Path follows the baseline's locale-segmented "
+        "app router layout; a bare src/app/dashboard/ path does not exist in this "
+        "repository. Distinct from the existing src/components/analytics/ PostHog "
+        "components, which are unrelated.",
     ),
 )
 

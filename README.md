@@ -139,6 +139,15 @@ stack can still be reproduced, Phase 1 uses it. If it cannot, the replacement
 stack is named and frozen before collection rather than quietly changing the
 meaning of "replication" after the fact.
 
+**As resolved for this run, the stack is exact and the materials are not.** The
+execution stack is EXACT (CLI 2.1.92, `claude-sonnet-4-6`, autoupdater disabled);
+the repository identity is MATCHED (`ixartz/Next-js-Boilerplate`); the baseline
+commit and the task prompts are RECONSTRUCTED, because the original publishes
+neither a commit SHA nor verbatim prompts. The study is therefore reported as a
+**preregistered conceptual replication executed on an exact execution stack**,
+never as an exact replication. The full classification, the baseline-selection
+rule and the per-task provenance are in `protocol/PREREGISTRATION.md`.
+
 ## What would count as an interesting result?
 
 Several outcomes would matter:
@@ -192,7 +201,7 @@ python scripts/power_check.py           # simulated power, clustered on sessions
 python scripts/seal_protocol.py --version v1.0 --timestamp <your DOI>
 python scripts/run_phase.py phase1 --harness replay   # pipeline dry run
 python scripts/analyze.py phase1
-python -m pytest                        # 50 tests
+python -m pytest                        # 55 tests
 ```
 
 ## Order of operations, and why it is that order
@@ -293,7 +302,7 @@ phase 3 (RQ3: does re-surfacing help, and is it content or interruption?)
 
 Gates exist because RQ1 conditions RQ2 conditions RQ3: if attenuation doesn't
 reproduce, the ladder measures the slope of nothing. They also control cost —
-all three phases at full depth is 1,280 sessions.
+all three phases at full depth is 1,360 sessions.
 
 The phase-1 criterion (`analysis/gate.py`) requires all four of: zero floor holds
 in the no-configuration baseline; floor control clears 50%; slope negative with
@@ -355,8 +364,8 @@ study exists to avoid.
 
 ## Before you run this for real
 
-- Fill every `TBD` in `protocol/PREREGISTRATION.md`, including the replication
-  mode from the environment check.
+- Fill the remaining `TBD`s in `protocol/PREREGISTRATION.md`: seal version and
+  external timestamp. The replication classification is already recorded.
 - Get an **external** timestamp. A self-issued one proves nothing about when the
   protocol existed; the tool marks any seal without one as `UNWITNESSED` and says
   so on every run. Zenodo DOI or an OpenTimestamps proof, deposited before the

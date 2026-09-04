@@ -8,7 +8,47 @@ Sealing before the environment check has run is a protocol violation.
 
 **Seal version:** TBD
 **External timestamp (DOI / OTS proof):** TBD
-**Replication mode:** EXACT — Claude Code CLI 2.1.92 with Claude Sonnet 4.6 (`claude-sonnet-4-6`)
+
+### Replication classification
+
+This study is a **preregistered conceptual replication executed on an exact
+execution stack**. Its components do not share a status, so they are classified
+separately; reporting the whole as an exact replication would overclaim.
+
+| Component | Status | Detail |
+|---|---|---|
+| Execution stack | **EXACT** | Claude Code CLI `2.1.92`, model `claude-sonnet-4-6`, `DISABLE_AUTOUPDATER=1`, isolated install |
+| Primary repository identity | **MATCHED** | `ixartz/Next-js-Boilerplate` |
+| Repository baseline commit | **RECONSTRUCTED** | `780c3dca75e6b39d92c8ac287618ed624eae802a` |
+| Task prompts (T3, T4, T5) | **RECONSTRUCTED** | From published task descriptions; the paper does not publish verbatim prompts |
+| Floor-control task (F1) | **ORIGINAL TO THIS STUDY** | Not part of McMillan's task set and never reported as such |
+| Overall classification | **CONCEPTUAL** | Exact stack, reconstructed materials |
+
+**Why the baseline is reconstructed.** The original does not publish the commit
+SHA it ran against, so no SHA can be matched. The baseline used here was selected
+by a rule fixed before selection: the immediate upstream parent of the first
+commit introducing `AGENTS.md`
+(`6337f95f91b06f9cd96577a451a5d76921cb430e`, 2026-02-11). That parent is
+`780c3dca75e6b39d92c8ac287618ed624eae802a`, verified to carry no `CLAUDE.md`,
+no `AGENTS.md`, no `.claude/` and no `.cursorrules`, which is the paper's stated
+configuration-free baseline condition. Verified absent at that SHA: `/api/health`,
+a reusable `Button` component, and a dashboard analytics page. Verified present:
+the dashboard, layout and navigation structures the tasks act on.
+
+**Why the task prompts are reconstructed.** The publication gives task
+*descriptions*, not prompts. T3 (NextAuth integration), T4 (sidebar/layout
+refactor) and T5 (dashboard analytics page with loading skeletons) are worded
+from those descriptions to be executable against the baseline, and carry no
+requirement the publication does not describe — in particular none was padded to
+raise function counts, which would manufacture the artifact the
+opportunity-matched ladder exists to prevent. Provenance is recorded per task in
+`src/contextfidelity/rules.py` and asserted by tests. Obtaining verbatim prompts
+later would be a protocol amendment requiring a new seal version.
+
+Note that the baseline ships Clerk (`@clerk/nextjs`) and no `next-auth`
+dependency, so T3 asks the agent to introduce a second auth stack. That is a
+property of the published task against this repository and is deliberately not
+corrected.
 
 ---
 

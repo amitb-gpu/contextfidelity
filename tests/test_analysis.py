@@ -130,3 +130,30 @@ def test_gate_inconclusive_when_underpowered():
 def test_gate_fails_if_baseline_leaks():
     g = evaluate_phase1_gate(_Fit(-0.0578, -0.07, -0.045), 0.05, 0.70)
     assert g.outcome == "NOT_REPRODUCED"
+
+
+def test_stopping_rules_document_agrees_with_enforced_constants():
+    """The sealed protocol document and the sealed code that enforces it must
+    not drift.
+
+    They did: the document carried floor_control_min 0.60 while gate.py enforced
+    0.50. A preregistration whose stated criterion differs from its executed
+    criterion is not preregistered in any meaningful sense, and nothing in the
+    pipeline reads this file, so only a test can hold them together.
+    """
+    from pathlib import Path
+
+    import yaml
+
+    from contextfidelity.analysis import gate
+
+    root = Path(__file__).resolve().parents[1]
+    doc = yaml.safe_load((root / "protocol" / "stopping_rules.yaml").read_text())
+    crit = doc["phase1"]["criterion_all_required"]
+    sample = doc["phase1"]["minimum_sample"]
+
+    assert crit["floor_control_min"] == gate.FLOOR_CONTROL_MIN
+    assert crit["zero_floor_max"] == gate.ZERO_FLOOR_MAX
+    assert tuple(crit["or_compatibility_band"]) == gate.OR_COMPATIBILITY_BAND
+    assert sample["sessions"] == gate.MIN_SESSIONS
+    assert sample["atoms"] == gate.MIN_ATOMS

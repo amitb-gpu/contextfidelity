@@ -43,3 +43,42 @@ def test_placebo_length_matched_at_every_rung():
 def test_only_a1_omits_resurfacing():
     assert not ARMS["A1"].resurfaces
     assert all(ARMS[a].resurfaces for a in ("A2", "A3", "A4"))
+
+
+def test_multi_task_pool_is_labelled_reconstructed():
+    """The publication gives task descriptions, not verbatim prompts.
+
+    If these are ever silently promoted to 'the original prompts', the study
+    would be claiming an exactness it does not have.
+    """
+    from contextfidelity.rules import MULTI_TASKS
+
+    for t in MULTI_TASKS:
+        assert "RECONSTRUCTED" in t.description, t.id
+
+
+def test_floor_control_is_not_attributed_to_the_original():
+    """F1 is ours. It must never be reported inside the replicated task pool."""
+    from contextfidelity.rules import FLOOR_TASKS, MULTI_TASKS
+
+    for t in FLOOR_TASKS:
+        assert "NOT part of McMillan" in t.description, t.id
+    assert not any(t.id.startswith("F") for t in MULTI_TASKS)
+
+
+def test_rq1_task_pool_matches_the_published_multi_function_tasks():
+    from contextfidelity.rules import MULTI_TASKS
+
+    assert [t.id for t in MULTI_TASKS] == ["T3", "T4", "T5"]
+
+
+def test_task_paths_follow_the_baseline_app_router_layout():
+    """The baseline is locale-segmented; a bare src/app/dashboard path does not
+    exist there, and a task targeting one would fail for reasons unrelated to
+    instruction adherence."""
+    from contextfidelity.rules import ALL_TASKS
+
+    for t in ALL_TASKS:
+        if "src/app/" in t.prompt:
+            assert "src/app/[locale]/" in t.prompt, t.id
+        assert "src/lib/" not in t.prompt, t.id

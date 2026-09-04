@@ -4,7 +4,12 @@ phase1:
   question: "RQ1 - does within-session attenuation replicate?"
   criterion_all_required:
     zero_floor_max: 0.01          # no-configuration baseline marker rate
-    floor_control_min: 0.60       # position-1 compliance in single-function control
+    floor_control_min: 0.50       # position-1 compliance in single-function control;
+                                  # calibrated, not round. The original's per-task rates
+                                  # ran 45%-84%, so 0.60 would sit inside ordinary healthy
+                                  # behaviour and could fail a sound study. Authoritative
+                                  # value is analysis/gate.py:FLOOR_CONTROL_MIN; a test
+                                  # asserts this file agrees with it.
     slope_negative_ci_excludes_zero: true
     or_compatibility_band: [0.85, 1.00]
   minimum_sample:

@@ -9,7 +9,9 @@ model, CLI version, and thinking mode all moved at once.
 
 So this module answers one question before any design work matters:
 
-    EXACT      pinned CLI and pinned model both available -> direct replication
+    EXACT      pinned CLI and pinned model both available -> exact execution
+               stack. This is a statement about the stack only: reconstructed
+               materials still make the overall study a conceptual replication.
     CONCEPTUAL something moved -> still worth running, but the deviation is
                named in the protocol, the title, and every claim
 
@@ -47,11 +49,17 @@ class EnvironmentReport:
     raw: dict[str, Any] = field(default_factory=dict)
 
     def summary(self) -> str:
-        lines = [f"replication mode: {self.mode}"]
+        lines = [f"execution-stack replication mode: {self.mode}"]
         lines.append(f"  CLI: {self.cli_version or 'not found'} (pin {ORIGINAL['pinned_cli']})")
         lines.append(f"  model: {self.model_requested or 'unset'} (pin {self.model_pin})")
         for d in self.deviations:
             lines.append(f"  deviation: {d}")
+        if self.mode == "EXACT":
+            lines.append("")
+            lines.append("  Execution stack only. This does not make the study an exact")
+            lines.append("  replication: see the replication classification in")
+            lines.append("  protocol/PREREGISTRATION.md for the status of the baseline")
+            lines.append("  commit and the task prompts.")
         if self.mode == "CONCEPTUAL":
             lines.append("")
             lines.append("  This is a conceptual replication. Record the deviations in")
