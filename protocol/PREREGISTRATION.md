@@ -3,11 +3,18 @@
 **Study:** Within-session instruction attenuation in coding agents — preregistered
 replication and complexity extension
 
-**Status:** DRAFT — not sealed. Fields marked `TBD` must be filled before sealing.
-Sealing before the environment check has run is a protocol violation.
+**Status:** SEALED at v1.0. Sealing before the environment check has run is a
+protocol violation; the check was run first and recorded in
+`protocol/ENVIRONMENT.json`.
 
-**Seal version:** TBD
-**External timestamp (DOI / OTS proof):** TBD
+**Seal version:** v1.0
+
+**External witness:** recorded in `protocol/WITNESS.json`, not here. This file is
+one of the sealed files, so an identifier written into it would change the very
+manifest hash the witness attests. The witness references the manifest hash
+instead, and `scripts/witness_protocol.py --verify` checks that the two agree.
+The same circularity, in its original form, is documented in
+`src/contextfidelity/seal.py`.
 
 ### Replication classification
 

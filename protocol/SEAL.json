@@ -1,0 +1,17 @@
+{
+  "created_at": 1788498017.78,
+  "files": {
+    "protocol/PREREGISTRATION.md": "d3cb46d1e24a256cf22f881557d7f6ce249aaf84ab9474f40ef518a44a1cc109",
+    "protocol/analysis_plan.md": "5f979796b52768bf9492a20e5422625e1ff79f3719c90caa0c18ec7cc3bd2c12",
+    "protocol/stopping_rules.yaml": "0012e61f5fff756f501f24a0a0240675cc971ecf69227b9ce2d75b197cfcf7f4",
+    "src/contextfidelity/analysis/gate.py": "8b6ca2c555d335c7d992f4b79a1036b145403956633f7b600842c6e5e8a9f381",
+    "src/contextfidelity/analysis/model.py": "1030561c999c24570b7874dec37e56f24a34eac94f47284562f19f6a96dbfe84",
+    "src/contextfidelity/analysis/positions.py": "f094dcf18db7d739475e73639315cfa63f118436c24423d9007a603714b2337b",
+    "src/contextfidelity/design.py": "1ac4001e1304d835e356b43ef00aaa8b943b28a2e7eda8a5433c98c11982ebfa",
+    "src/contextfidelity/rules.py": "5270493944b7a62f8be5ba822bea80beec4ef35915a40b06269e9351cc8f59dc",
+    "src/contextfidelity/scoring.py": "38c5ea7c7b0e6ec9e15c1113537c32d5cf3970be48406261dcf087bbdb41176c"
+  },
+  "manifest_hash": "cfe3058868cf8656eeda9227475238abbb69c547e5e218fb3eaf87354b76b1fa",
+  "note": "ContextFidelity preregistered conceptual replication on an exact execution stack",
+  "version": "v1.0"
+}

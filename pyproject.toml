@@ -19,6 +19,9 @@ dependencies = [
 
 [project.optional-dependencies]
 stats = ["statsmodels>=0.14"]
+# External witnessing. Not needed to run the study, only to create or upgrade
+# the OpenTimestamps proof in protocol/.
+witness = ["opentimestamps-client>=0.7"]
 dev = ["pytest>=8.0"]
 
 [tool.setuptools.packages.find]

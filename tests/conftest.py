@@ -15,5 +15,12 @@ def settings(tmp_path) -> Settings:
         if src.exists():
             shutil.copytree(src, tmp_path / name)
     s = Settings(root=tmp_path)
-    s.seal_path.unlink(missing_ok=True)  # start every test from an unsealed tree
+    # Start every test from an unsealed, unwitnessed tree. The real protocol/
+    # directory is copied in wholesale, so once the repository carries a live
+    # seal, witness and .ots proof they would otherwise leak into fixtures and
+    # make "no witness present" untestable.
+    s.seal_path.unlink(missing_ok=True)
+    (s.protocol_dir / "WITNESS.json").unlink(missing_ok=True)
+    for stale in s.protocol_dir.glob("*.ots"):
+        stale.unlink()
     return s

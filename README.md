@@ -375,8 +375,9 @@ study exists to avoid.
 
 ## Before you run this for real
 
-- Fill the remaining `TBD`s in `protocol/PREREGISTRATION.md`: seal version and
-  external timestamp. The replication classification is already recorded.
+- The preregistration is complete: replication classification, seal version and
+  witness pointer are all recorded. The external witness identifier deliberately
+  lives in `protocol/WITNESS.json` rather than in the sealed document.
 - Get an **external** timestamp. A self-issued one proves nothing about when the
   protocol existed; the tool marks any seal without one as `UNWITNESSED` and says
   so on every run. Zenodo DOI or an OpenTimestamps proof, deposited before the
