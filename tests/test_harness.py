@@ -119,3 +119,50 @@ def test_blocked_runs_do_not_satisfy_a_cell():
         assert led.completed_cells() == {}
         led.append(run_id="b", status="no_code", **common)
         assert led.completed_cells() == {"C|T3": 1}
+
+
+def test_rate_limited_session_is_blocked_not_no_code():
+    """The failure that wrecked the first Phase 1.
+
+    91 quota-exhausted sessions were recorded as no_code, which counts as a
+    completed cell, so resume would have skipped them permanently and the phase
+    would have been silently short of data forever.
+    """
+    from contextfidelity.harness import parse_stream
+
+    stream = "\n".join([
+        json.dumps({"type": "rate_limit_event",
+                    "rate_limit_info": {"status": "rejected", "rateLimitType": "five_hour"}}),
+        _result_event(total_cost_usd=0.0,
+                      usage={"input_tokens": 0, "output_tokens": 0,
+                             "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}),
+    ])
+    res = parse_stream(stream)
+    assert res.rate_limit_status == "rejected"
+
+
+def test_allowed_rate_limit_event_is_not_a_failure():
+    """Healthy sessions also emit rate_limit_event with status 'allowed';
+    treating its mere presence as failure would invalidate every good run."""
+    from contextfidelity.harness import parse_stream
+
+    stream = "\n".join([
+        json.dumps({"type": "rate_limit_event", "rate_limit_info": {"status": "allowed"}}),
+        _result_event(),
+    ])
+    assert parse_stream(stream).rate_limit_status == ""
+
+
+def test_no_work_detection_distinguishes_infrastructure_from_behaviour():
+    """A genuine no_code session still costs money and emits tokens; a dead
+    environment returns in under two seconds having spent nothing."""
+    from contextfidelity.harness import parse_stream
+
+    dead = parse_stream(_result_event(
+        total_cost_usd=0.0,
+        usage={"input_tokens": 0, "output_tokens": 0,
+               "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0}))
+    assert dead.total_cost_usd == 0.0 and dead.output_tokens == 0 and not dead.timeline
+
+    real = parse_stream(_result_event())
+    assert real.total_cost_usd > 0 and real.output_tokens > 0

@@ -204,7 +204,7 @@ python scripts/preflight.py                          # fail-closed, incl. write 
 python scripts/run_phase.py phase1 --harness replay   # pipeline dry run
 python scripts/freeze_ledger.py phase1               # freeze raw data first
 python scripts/analyze.py phase1
-python -m pytest                        # 70 tests
+python -m pytest                        # 73 tests
 ```
 
 ## Order of operations, and why it is that order

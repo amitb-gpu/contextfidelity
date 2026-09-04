@@ -88,3 +88,65 @@ now taken from the terminal `result` event, and `total_cost_usd` is recorded.
 
 No preregistered endpoint, denominator or gate criterion reads these fields. They
 are ancillary accounting and cannot affect the phase-1 decision.
+
+## D-004 — Phase 1 attempt 1 invalidated: account quota exhausted mid-collection
+
+- **Governing protocol:** v1.1-protocol, manifest `eb747a9e90caca4b9cbc4cb9ec38e331edf38789e6bdc93386fa8983fc0594ec`
+- **Date:** 2026-09-05
+- **Kind:** operational (environment fault, invalidated phase)
+
+The first Phase-1 collection iterated all 340 planned sessions but produced a
+usable result for none of the design's comparisons. The account's five-hour
+usage window was exhausted after approximately 59 sessions (~4.3 hours of
+collection), and `overageStatus` was `rejected` with reason `out_of_credits`, so
+there was no headroom. Every subsequent session returned in ~1.8s with one turn,
+zero tokens and `$0.0000` cost, and the stream carried a `rate_limit_event`.
+
+Observed distribution:
+
+| Cell | Result |
+|---|---|
+| `P1-BASE` | 59 ok, 91 invalid |
+| `P1-L0-A1` | 150 invalid, **zero** usable |
+| `P1-L0-FLOOR` | 40 invalid, **zero** usable |
+
+The treatment cell and the floor controls contain no data at all, so the phase
+cannot support the reproduction criterion under any handling of the remainder.
+
+**Two classification faults, both the D-001 failure in a new costume.** 91
+quota-exhausted sessions were recorded as `no_code` — a behavioural outcome that
+feeds the Code-Production Rate *and* counts as a completed cell, so a resume
+would have skipped those 150 baseline runs permanently and left the phase
+silently short of data. The other 190 were recorded as bare `error`. In both
+cases an infrastructure fault was presented as something the model did.
+
+Collection also continued for 281 sessions after the environment was dead,
+because nothing checked whether consecutive runs were producing anything.
+
+**Disposition.** The phase was frozen before being touched, so the failure is
+recorded immutably: chain intact, single governing seal `eb747a9e90ca`, ledger
+sha256 `f7b12f1b505fa67bc530f793af024a394276bba0231525ededcb7af683ace9ce`. It is
+quarantined at `runs-INVALID-rate-limit-phase1/`, excluded from every scientific
+denominator, and is not on any resume path.
+
+**No analysis was run and no gate outcome was computed.** Reporting
+`NOT_REPRODUCED` or `INCONCLUSIVE` from a phase whose treatment cell is empty
+would be reporting an infrastructure failure as a scientific result.
+
+**Resolution, effective for all subsequent collection:**
+
+1. A session carrying a non-`allowed` `rate_limit_event`, or one that engaged no
+   API work at all (no tool events, zero cost, zero output tokens), is now
+   classified `blocked`. `blocked` satisfies no cell and produces no scored rows,
+   so such runs are retried on resume rather than silently accepted. A
+   `rate_limit_event` with status `allowed` appears on healthy sessions and is
+   explicitly not treated as a fault.
+2. `run_phase` aborts after 5 consecutive invalid sessions and reports the abort,
+   rather than grinding through a dead environment.
+3. Collection must be planned around the five-hour window. At the observed ~264s
+   per session, roughly 55-60 sessions fit in one window, so Phase 1 requires
+   about six windows and must be run as resumable chunks.
+
+No experimental, design or analysis change accompanies this entry, so the
+manifest is unchanged and no re-seal is required. This is the case the
+append-only log exists for.

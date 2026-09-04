@@ -200,6 +200,7 @@ def run_phase(
     limit: int | None = None,
     on_run: Callable[[dict[str, Any]], None] | None = None,
     require_witness: bool = False,
+    max_consecutive_invalid: int = 5,
 ) -> dict[str, Any]:
     """Execute a phase. Verifies the seal once up front and refuses to run
     without it — data collected under a broken seal is not preregistered.
@@ -217,6 +218,8 @@ def run_phase(
     done = ledger.completed_cells()
 
     executed, skipped, rows = 0, 0, []
+    consecutive_invalid = 0
+    aborted: str | None = None
     for planned in expand(phase, resolved_rung):
         if limit is not None and executed >= limit:
             break
@@ -234,6 +237,20 @@ def run_phase(
         executed += 1
         if on_run:
             on_run(out)
+
+        # Abort rather than grind on through a dead environment. When the quota
+        # was exhausted mid-phase the run continued for 281 more sessions,
+        # producing nothing and taking 40 minutes to do it. A run of consecutive
+        # invalid sessions is an environment fault, and continuing only makes the
+        # wreckage larger.
+        consecutive_invalid = consecutive_invalid + 1 if out["status"] == "blocked" else 0
+        if consecutive_invalid >= max_consecutive_invalid:
+            aborted = (
+                f"aborted after {consecutive_invalid} consecutive invalid sessions "
+                f"(last: {out['run_id']}). The environment is not collecting data; "
+                "these runs are excluded and the phase is resumable once it recovers."
+            )
+            break
 
     rows_path = settings.scored_dir / f"{phase.id}.jsonl"
     rows_path.parent.mkdir(parents=True, exist_ok=True)
@@ -254,6 +271,7 @@ def run_phase(
         "seal_status": wstate.status,
         "witness": wstate.detail,
         "distinct_seals_in_ledger": sorted(h[:12] for h in ledger.seal_hashes()),
+        "aborted": aborted,
     }
 
 

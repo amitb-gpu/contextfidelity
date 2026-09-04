@@ -52,6 +52,7 @@ class SessionResult:
     cache_write_tokens: int = 0
     total_cost_usd: float = 0.0
     permission_denials: int = 0
+    rate_limit_status: str = ""
     harness_version: str = ""
     model_id: str = ""
     raw_log: str = ""
@@ -144,7 +145,32 @@ class ClaudeCodeHarness:
             result.status = "error"
             result.error = (proc.stderr or "")[:2000]
         result.changed_files = changed_files(repo)
-        if result.permission_denials:
+
+        # A session that never engaged the API did not produce a behavioural
+        # outcome, whatever its exit code. Phase 1 ran 281 such sessions after
+        # the account's five-hour quota was exhausted: 91 were recorded as
+        # no_code, which counts as a completed cell and would have been skipped
+        # forever on resume, and 190 as bare error. Both are infrastructure
+        # faults wearing an outcome's clothes -- the same failure as the
+        # permission-denial incident, in a new costume.
+        did_no_work = (
+            not result.timeline
+            and result.total_cost_usd == 0.0
+            and result.output_tokens == 0
+        )
+        if result.rate_limit_status:
+            result.status = "blocked"
+            result.error = (
+                f"rate limited (status={result.rate_limit_status}); the session did no work. "
+                "Invalid: must not enter any denominator, and must be retried."
+            )
+        elif did_no_work:
+            result.status = "blocked"
+            result.error = (
+                "session engaged no API work (no tool events, zero cost, zero output tokens); "
+                "treated as an infrastructure fault, not a behavioural no_code."
+            )
+        elif result.permission_denials:
             # Never allow a denied write to be recorded as "the agent wrote no
             # code". no_code is a behavioural outcome that feeds the
             # Code-Production Rate; a denial is a harness fault and the run is
@@ -196,6 +222,14 @@ def parse_stream(stdout: str) -> SessionResult:
             model = (evt.get("message", {}) or {}).get("model")
             if model:
                 res.model_id = str(model)
+
+        elif evt.get("type") == "rate_limit_event":
+            info = evt.get("rate_limit_info", {}) or {}
+            status = str(info.get("status", ""))
+            # "allowed" appears on healthy sessions too; only a non-allowed
+            # status means the request was actually refused.
+            if status and status != "allowed":
+                res.rate_limit_status = status
 
         elif evt.get("type") == "result":
             # The terminal event carries session totals. Summing per-turn usage
